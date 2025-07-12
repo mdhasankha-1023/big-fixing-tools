@@ -15,7 +15,7 @@ export const badWordsMap = {
   transferwise : "t-ransferwise",
   peopleperhour : "p-eopleperhour",
   upwork : "u-pwork",
-  reviews : "r-eviews",
-  review : "r-eview",
+  reviews : "check",
+  review : "checked",
   rating : "r-ating",
 };

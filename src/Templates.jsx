@@ -13,8 +13,8 @@ export default function Templates({selectedTemplate, setSelectedTemplate, setInp
   
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold text-slate-800 mb-4">
+    <div className="p-4 bg-white border-emerald-500 border-1 rounded-lg:">
+      <h2 className="text-2xl font-semibold text-emerald-500 mb-4">
         Choose your template
       </h2>
 
@@ -23,13 +23,13 @@ export default function Templates({selectedTemplate, setSelectedTemplate, setInp
           <li
             key={index}
             onClick={() => handleTemplateSelect(template)}
-            className={`cursor-pointer flex items-center justify-between px-4 py-3 hover:bg-slate-100 rounded ${
-              selectedTemplate?.name === template.name ? "bg-slate-100" : ""
+            className={`group cursor-pointer flex items-center justify-between px-4 py-3 hover:bg-emerald-500 rounded ${
+              selectedTemplate?.name === template.name ? "bg-emerald-500" : ""
             }`}
           >
-            <h4 className="text-base text-slate-700">{template.name}</h4>
+            <h4 className={`text-base text-slate-700 group-hover:text-white ${selectedTemplate?.name === template.name && "text-white"}`}>{template.name}</h4>
             {selectedTemplate?.name === template.name && (
-              <FaCheck className="text-green-500" />
+              <FaCheck className="text-white" />
             )}
           </li>
         ))}

@@ -141,28 +141,22 @@ const MessageFixer = () => {
   };
 
   return (
-    <div className="mt-10 p-4 mx-auto">
-      <h1 className="text-[50px] font-semibold text-center mb-6">
-        BUG FIXING TOOLS (V2.0)
+    <div className="p-4 bg-[#fafafa] h-[100vh] w-[100vw]">
+      <h1 className="text-[50px] font-semibold text-center mb-[50px]">
+        BUG FIXING TOOLS <span className="text-emerald-500 font-bold">(V2.0)</span>
       </h1>
-      <div className="flex gap-[100px] w-full justify-center items-start">
+      <div className="flex gap-[50px] w-full justify-center items-start">
         <Templates selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} setInputText={setInputText}/>
         <div className="flex flex-col w-[60%]">
-          <div className="relative mb-4">
+          <div className="mb-4">
             <textarea
               id="id-01"
               placeholder="Write your message"
               rows="10"
-              className="text-[18px] w-full h-[50vh] overflow-auto resize-none p-[30px] text-sm border rounded outline-none border-slate-200 text-slate-500 focus:border-emerald-500"
+              className="bg-white border-1 border-emerald-500 rounded-xl p-6 text-[18px] w-full h-[70vh] overflow-auto resize-none text-sm outline-none text-black focus:border-emerald-500"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
             />
-            <label
-              htmlFor="id-01"
-              className="cursor-text absolute left-4 -top-3 text-xs text-slate-400 bg-white px-1"
-            >
-              Write your message
-            </label>
           </div>
 
           <div className="flex justify-end">
@@ -213,7 +207,7 @@ const MessageFixer = () => {
             </div>
 
             <div
-              className="overflow-auto h-full border rounded p-4 text-base leading-relaxed"
+              className="overflow-y-auto-auto overflow-x-hidden h-full border rounded p-4 text-base leading-relaxed"
               style={{ whiteSpace: "pre-wrap" }}
             >
               {modalContent.map((line, lineIndex) => (
@@ -278,6 +272,8 @@ const MessageFixer = () => {
           </div>
         </div>
       )}
+
+      <footer className="fixed bottom-[5%] text-center w-full">Developed by  <span className="font-semibold text-emerald-600">Md. Hasan Kha</span></footer>
     </div>
   );
 };
