@@ -13,7 +13,7 @@ export default function Templates({selectedTemplate, setSelectedTemplate, setInp
   
 
   return (
-    <div className="p-4 bg-white border-emerald-500 border-1 rounded-lg:">
+    <div className="p-4 bg-white border-emerald-500 border-1 rounded-xl">
       <h2 className="text-2xl font-semibold text-emerald-500 mb-4">
         Choose your template
       </h2>

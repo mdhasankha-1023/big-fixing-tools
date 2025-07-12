@@ -143,17 +143,22 @@ const MessageFixer = () => {
   return (
     <div className="p-4 bg-[#fafafa] h-[100vh] w-[100vw]">
       <h1 className="text-[50px] font-semibold text-center mb-[50px]">
-        BUG FIXING TOOLS <span className="text-emerald-500 font-bold">(V2.0)</span>
+        BUG FIXING TOOLS{" "}
+        <span className="text-emerald-500 font-bold">(V2.0)</span>
       </h1>
       <div className="flex gap-[50px] w-full justify-center items-start">
-        <Templates selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} setInputText={setInputText}/>
+        <Templates
+          selectedTemplate={selectedTemplate}
+          setSelectedTemplate={setSelectedTemplate}
+          setInputText={setInputText}
+        />
         <div className="flex flex-col w-[60%]">
           <div className="mb-4">
             <textarea
               id="id-01"
               placeholder="Write your message"
               rows="10"
-              className="bg-white border-1 border-emerald-500 rounded-xl p-6 text-[18px] w-full h-[70vh] overflow-auto resize-none text-sm outline-none text-black focus:border-emerald-500"
+              className="bg-white border-1 border-emerald-500 rounded-xl p-6 text-[18px] w-full h-[60vh] overflow-y-auto resize-none outline-none text-black focus:border-emerald-500"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
             />
@@ -206,14 +211,11 @@ const MessageFixer = () => {
               <strong>{badWordCount}</strong> bad word(s) detected
             </div>
 
-            <div
-              className="overflow-y-auto-auto overflow-x-hidden h-full border rounded p-4 text-base leading-relaxed"
-              style={{ whiteSpace: "pre-wrap" }}
-            >
+            <div className="overflow-y-auto overflow-x-hidden h-full border rounded p-4 text-[18px] text-black leading-relaxed whitespace-pre-wrap break-words">
               {modalContent.map((line, lineIndex) => (
                 <div key={lineIndex}>
                   {line.map((item) => {
-                    let className = "mr-1";
+                    let className = "mr-1 inline";
                     if (item.isBad && !item.isFixed) {
                       className += " bg-red-500 text-white px-1 rounded";
                     } else if (item.isFixed) {
@@ -273,7 +275,10 @@ const MessageFixer = () => {
         </div>
       )}
 
-      <footer className="fixed bottom-[5%] text-center w-full">Developed by  <span className="font-semibold text-emerald-600">Md. Hasan Kha</span></footer>
+      <footer className="fixed bottom-[5%] text-center w-full">
+        Developed by{" "}
+        <span className="font-semibold text-emerald-600">Md. Hasan Kha</span>
+      </footer>
     </div>
   );
 };
