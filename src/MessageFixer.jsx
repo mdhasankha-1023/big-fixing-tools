@@ -25,9 +25,9 @@ const MessageFixer = () => {
   const [isCopied, setIsCopied] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
-  // ✅ Step 1: Define dynamic limits based on template name
+  // ✅ Dynamic limits based on template name
   const characterLimit = useMemo(() => {
-    if (!selectedTemplate) return 1500; // Default limit for custom text
+    if (!selectedTemplate) return 1500;
 
     switch (selectedTemplate.name) {
       case "Extension Request":
@@ -169,17 +169,25 @@ const MessageFixer = () => {
         <span className="text-emerald-500 font-bold">(V2.1)</span>
       </h1>
       <div className="flex gap-[50px] w-full justify-center items-start">
-        <Templates
-          selectedTemplate={selectedTemplate}
-          setSelectedTemplate={setSelectedTemplate}
-          setInputText={setInputText}
-        />
+        
+        {/* ✅ Left Column: Templates with Top Spacer */}
+        <div className="flex flex-col">
+          {/* This empty div (h-6 + mb-2) aligns the template list with the textarea */}
+          <div className="h-6 mb-2"></div> 
+          <Templates
+            selectedTemplate={selectedTemplate}
+            setSelectedTemplate={setSelectedTemplate}
+            setInputText={setInputText}
+          />
+        </div>
+
+        {/* ✅ Right Column: Message Fixer */}
         <div className="flex flex-col w-[60%]">
-          {/* ✅ Step 2: Added Character Count Header with Validation Message */}
+          {/* Character Count Header (Height = h-6 + mb-2) */}
           <div className="flex justify-between items-end mb-2 px-1">
             <div className="h-6">
               {isOverLimit && (
-                <span className="text-red-500 font-medium text-sm flex items-center gap-1">
+                <span className="text-red-500 font-medium text-sm flex items-center gap-1 animate-pulse">
                   ⚠️ The max number reached. You need to optimize this.
                 </span>
               )}
@@ -198,9 +206,9 @@ const MessageFixer = () => {
               id="id-01"
               placeholder="Write your message"
               rows="10"
-              className={`bg-white border-2 rounded-xl p-6 text-[18px] w-full h-[60vh] overflow-y-auto resize-none outline-none text-black transition-colors ${
+              className={`bg-white border-2 rounded-xl p-6 text-[18px] w-full h-[60vh] overflow-y-auto resize-none outline-none text-black transition-all ${
                 isOverLimit
-                  ? "border-red-500 focus:border-red-600"
+                  ? "border-red-500 focus:border-red-600 shadow-sm"
                   : "border-emerald-500 focus:border-emerald-600"
               }`}
               value={inputText}
@@ -212,7 +220,7 @@ const MessageFixer = () => {
             <button
               onClick={detectBugs}
               disabled={isOverLimit}
-              className={`px-5 py-2 rounded transition ${
+              className={`px-5 py-2 rounded font-medium transition ${
                 isOverLimit
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "cursor-pointer bg-red-500 text-white hover:bg-red-600"
