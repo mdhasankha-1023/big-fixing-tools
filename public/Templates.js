@@ -5,6 +5,8 @@ export const templates = [
 
 I hope you are doing well, 
 
+It's a first draft update,
+
 As per your instruction, I've completed all the following tasks-
 
 01. I've designed the website following your references.
@@ -27,13 +29,13 @@ As per your instruction, I've completed all the following tasks-
 - Terms & Conditions
 - Privacy Policy
 
-Here is the website's Live URL:  https://sinead327.wixsite.com/clari-t-men/home
+Here is the website's URL:  https://sinead327.wixsite.com/clari-t-men/home
  
 Note: I've used placeholder images and dummy content on the website. Once you provide all the content, I will replace it.
 
 Please have a look at your end. If you have any other feedback or need further adjustments, please let me know.  I will modify it as specified and return it to you promptly.
 
-Thank you`,
+Best regards`,
   },
   {
     name: "Follow Up",
@@ -45,7 +47,7 @@ I just wanted to check in — have you had a chance to review the full site? Onc
 
 Looking forward to hearing from you!
 
-Best regards
+Best regards,
 `,
   },
   {
@@ -74,7 +76,7 @@ No worries about this project. You will get 30 days of ongoing support from me a
 
 Please let me know your thoughts on moving forward.
 
-Thank you.
+Best regards,
 `,
   },
   {
@@ -95,9 +97,9 @@ As per your instruction, I've completed the tasks-
 
 05. I've designed the 'Testimonials" section.
 
-Here is the website's Live URL:  https://www.jennifercummingsportfolio.com
+Here is the website's URL:  https://www.jennifercummingsportfolio.com
 
-Since I have completed all of the tasks on my end and the delivery time is about to end. So I am delivering this project to you.
+Since I have completed all of the tasks on my end. I am delivering this project to you.
 
 No worries about this project's delivery. After approving this project delivery based on my work, I'll give you 30 days of ongoing support. In this support period, If you need any changes or modifications, you can let me know in my "Fiverr Inbox." I will take care of the rest.
 
@@ -105,7 +107,7 @@ If everything looks great, please accept the job and spend a couple of minutes s
 
 It's a pleasure to work with you, and I hope we'll work together in the future.
 
-Thank you.
+Best regards,
 
 `,
   },
@@ -130,11 +132,7 @@ Best regards,
   },
   {
     name: "Extension Request",
-    content: `Hi there,
-
-I hope you’re doing well,
-
-I'm still working on your last modification. I'll send the update ASAP. Since the delivery time is about to end. So I sent the delivery time extension request so that I can complete it in the meantime. Please accept the delivery time extension request. 
+    content: `I'm still working on your last modification. I'll send the update ASAP. Since the delivery time is about to end. So I sent the delivery time extension request so that I can complete it in the meantime. Please accept the delivery time extension request. 
 
 Thank you
 `,
@@ -147,7 +145,7 @@ Just following up to see if you're available for the meeting I mentioned earlier
 
 Looking forward to your response.
 
-Thanks!
+Best regards,
 `,
   },
 ];
