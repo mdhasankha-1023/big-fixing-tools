@@ -27,7 +27,7 @@ const MessageFixer = () => {
 
   // ✅ Dynamic limits based on template name
   const characterLimit = useMemo(() => {
-    if (!selectedTemplate) return 1500;
+    if (!selectedTemplate) return 2500;
 
     switch (selectedTemplate.name) {
       case "Extension Request":
