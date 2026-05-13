@@ -34,12 +34,6 @@ export default function Templates({selectedTemplate, setSelectedTemplate, setInp
           </li>
         ))}
       </ul>
-
-      {/* {selectedTemplate && (
-        <div className="bg-slate-50 p-4 border border-slate-200 rounded shadow prose max-w-none">
-          <ReactMarkdown>{selectedTemplate.content}</ReactMarkdown>
-        </div>
-      )} */}
     </div>
   );
 }

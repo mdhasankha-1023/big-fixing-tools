@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { badWordsMap } from "../public/Badword";
 import Templates from "./Templates";
 
@@ -22,8 +22,31 @@ const MessageFixer = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
   const [badWordCount, setBadWordCount] = useState(0);
-  const [isCopied, setIsCopied] = useState(false); // ✅ new state
+  const [isCopied, setIsCopied] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+  // ✅ Step 1: Define dynamic limits based on template name
+  const characterLimit = useMemo(() => {
+    if (!selectedTemplate) return 1500; // Default limit for custom text
+
+    switch (selectedTemplate.name) {
+      case "Extension Request":
+        return 400;
+      case "Meting Follow-up":
+      case "Follow Up":
+        return 2500;
+      case "First Update":
+      case "Working Progress":
+        return 2500;
+      case "Delivery Follow-up":
+      case "Delivery Message":
+        return 2500;
+      default:
+        return 2500;
+    }
+  }, [selectedTemplate]);
+
+  const isOverLimit = inputText.length > characterLimit;
 
   const detectBugs = () => {
     const lines = inputText.split("\n");
@@ -100,7 +123,7 @@ const MessageFixer = () => {
     setBadWordCount(countBadWords);
     setIsResolved(false);
     setIsModalOpen(true);
-    setIsCopied(false); // reset copy state
+    setIsCopied(false);
   };
 
   const resolveBugs = () => {
@@ -129,7 +152,6 @@ const MessageFixer = () => {
     setBadWordCount(updatedBadWordCount);
   };
 
-  // ✅ Handle copy with checkmark feedback
   const handleCopyAndClose = () => {
     navigator.clipboard.writeText(fixedText || inputText).then(() => {
       setIsCopied(true);
@@ -144,7 +166,7 @@ const MessageFixer = () => {
     <div className="p-4 bg-[#fafafa] h-[100vh] w-[100vw]">
       <h1 className="text-[50px] font-semibold text-center mb-[50px]">
         BUG FIXING TOOLS{" "}
-        <span className="text-emerald-500 font-bold">(V2.0)</span>
+        <span className="text-emerald-500 font-bold">(V2.1)</span>
       </h1>
       <div className="flex gap-[50px] w-full justify-center items-start">
         <Templates
@@ -153,12 +175,34 @@ const MessageFixer = () => {
           setInputText={setInputText}
         />
         <div className="flex flex-col w-[60%]">
+          {/* ✅ Step 2: Added Character Count Header with Validation Message */}
+          <div className="flex justify-between items-end mb-2 px-1">
+            <div className="h-6">
+              {isOverLimit && (
+                <span className="text-red-500 font-medium text-sm flex items-center gap-1">
+                  ⚠️ The max number reached. You need to optimize this.
+                </span>
+              )}
+            </div>
+            <div
+              className={`text-sm font-bold px-2 py-1 rounded ${
+                isOverLimit ? "bg-red-100 text-red-600" : "text-emerald-600"
+              }`}
+            >
+              {inputText.length} / {characterLimit}
+            </div>
+          </div>
+
           <div className="mb-4">
             <textarea
               id="id-01"
               placeholder="Write your message"
               rows="10"
-              className="bg-white border-1 border-emerald-500 rounded-xl p-6 text-[18px] w-full h-[60vh] overflow-y-auto resize-none outline-none text-black focus:border-emerald-500"
+              className={`bg-white border-2 rounded-xl p-6 text-[18px] w-full h-[60vh] overflow-y-auto resize-none outline-none text-black transition-colors ${
+                isOverLimit
+                  ? "border-red-500 focus:border-red-600"
+                  : "border-emerald-500 focus:border-emerald-600"
+              }`}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
             />
@@ -167,7 +211,12 @@ const MessageFixer = () => {
           <div className="flex justify-end">
             <button
               onClick={detectBugs}
-              className="cursor-pointer bg-red-500 text-white px-5 py-2 rounded hover:bg-red-600 transition"
+              disabled={isOverLimit}
+              className={`px-5 py-2 rounded transition ${
+                isOverLimit
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "cursor-pointer bg-red-500 text-white hover:bg-red-600"
+              }`}
             >
               Detect
             </button>
@@ -239,7 +288,6 @@ const MessageFixer = () => {
                 Resolve
               </button>
 
-              {/* ✅ Copy button with checkmark */}
               <button
                 onClick={handleCopyAndClose}
                 className={`flex items-center gap-2 cursor-pointer px-5 py-2 rounded transition border ${
