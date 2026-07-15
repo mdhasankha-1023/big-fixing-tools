@@ -15,6 +15,35 @@ const matchCase = (original, replacement) => {
     .join("");
 };
 
+
+const findAllBadMatches = (lower) => {
+  const claimed = [];
+  const isOverlapping = (start, end) =>
+    claimed.some((r) => start < r.end && end > r.start);
+
+  const matches = [];
+
+  for (const [badWord, badReplacement] of Object.entries(badWordsMap)) {
+    if (!badWord) continue;
+
+    let searchFrom = 0;
+    let idx;
+    while ((idx = lower.indexOf(badWord, searchFrom)) !== -1) {
+      const start = idx;
+      const end = idx + badWord.length;
+
+      if (!isOverlapping(start, end)) {
+        matches.push({ start, end, badWord, badReplacement });
+        claimed.push({ start, end });
+      }
+
+      searchFrom = idx + 1;
+    }
+  }
+
+  return matches.sort((a, b) => a.start - b.start);
+};
+
 const MessageFixer = () => {
   const [inputText, setInputText] = useState("");
   const [modalContent, setModalContent] = useState([]);
@@ -24,6 +53,9 @@ const MessageFixer = () => {
   const [badWordCount, setBadWordCount] = useState(0);
   const [isCopied, setIsCopied] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+  // ✅ Controls the mobile hamburger/dropdown for templates
+  const [isMobileTemplateOpen, setIsMobileTemplateOpen] = useState(false);
 
   // ✅ Dynamic limits based on template name
   const characterLimit = useMemo(() => {
@@ -55,61 +87,68 @@ const MessageFixer = () => {
       const words = line.split(/\s+/);
 
       const highlightedWords = words.flatMap((word, wordIndex) => {
-        const punctuation = word.match(/[.,!?]$/);
         const cleanWord = word.replace(/[.,!?]/g, "");
         const lower = cleanWord.toLowerCase();
 
-        for (const [badWord, badReplacement] of Object.entries(badWordsMap)) {
-          const badIndex = lower.indexOf(badWord);
-          if (badIndex !== -1) {
-            const before = word.slice(0, badIndex);
-            const bad = word.slice(badIndex, badIndex + badWord.length);
-            const after = word.slice(badIndex + badWord.length);
-            const casedReplacement = matchCase(bad, badReplacement);
+        const matches = findAllBadMatches(lower);
 
-            const parts = [];
-
-            if (before) {
-              parts.push({
-                original: before,
-                isBad: false,
-                isFixed: false,
-                fixed: before,
-                id: `${lineIndex}-${wordIndex}-before`,
-              });
-            }
-
-            parts.push({
-              original: bad,
-              isBad: true,
+        if (matches.length === 0) {
+          return [
+            {
+              original: word,
+              isBad: false,
               isFixed: false,
-              fixed: casedReplacement,
-              id: `${lineIndex}-${wordIndex}-bad`,
-            });
-
-            if (after || punctuation) {
-              parts.push({
-                original: after + (punctuation ? punctuation[0] : ""),
-                isBad: false,
-                isFixed: false,
-                fixed: after + (punctuation ? punctuation[0] : ""),
-                id: `${lineIndex}-${wordIndex}-after`,
-              });
-            }
-
-            return parts;
-          }
+              fixed: word,
+              id: `${lineIndex}-${wordIndex}`,
+              wordIndex,
+            },
+          ];
         }
 
-        return [
-          {
-            original: word,
+        const parts = [];
+        let cursor = 0;
+
+        matches.forEach((m, mIdx) => {
+          if (m.start > cursor) {
+            const segment = word.slice(cursor, m.start);
+            parts.push({
+              original: segment,
+              isBad: false,
+              isFixed: false,
+              fixed: segment,
+              id: `${lineIndex}-${wordIndex}-seg${mIdx}-before`,
+              wordIndex,
+            });
+          }
+
+          const badSegment = word.slice(m.start, m.end);
+          const casedReplacement = matchCase(badSegment, m.badReplacement);
+
+          parts.push({
+            original: badSegment,
+            isBad: true,
+            isFixed: false,
+            fixed: casedReplacement,
+            id: `${lineIndex}-${wordIndex}-seg${mIdx}-bad`,
+            wordIndex,
+          });
+
+          cursor = m.end;
+        });
+
+        if (cursor < word.length) {
+          const segment = word.slice(cursor);
+          parts.push({
+            original: segment,
             isBad: false,
             isFixed: false,
-            fixed: word,
-            id: `${lineIndex}-${wordIndex}`,
-          },
-        ];
+            fixed: segment,
+            id: `${lineIndex}-${wordIndex}-after`,
+            wordIndex,
+          });
+        }
+
+        return parts;
       });
 
       return highlightedWords;
@@ -136,8 +175,28 @@ const MessageFixer = () => {
       })
     );
 
+    // ✅ Group fragments that belong to the SAME word (same wordIndex) and
+    // concatenate them with NO space in between. Only separate words get
+    // joined with a space. This prevents stray spaces when a bad word
+    // (e.g. "@") is replaced with an empty string.
     const fixedString = resolved
-      .map((line) => line.map((item) => item.fixed).join(" "))
+      .map((line) => {
+        const wordGroups = [];
+        const indexMap = new Map();
+
+        line.forEach((item) => {
+          if (!indexMap.has(item.wordIndex)) {
+            indexMap.set(item.wordIndex, []);
+            wordGroups.push(item.wordIndex);
+          }
+          indexMap.get(item.wordIndex).push(item.fixed);
+        });
+
+        return wordGroups
+          .map((wi) => indexMap.get(wi).join(""))
+          .filter((word) => word.length > 0)
+          .join(" ");
+      })
       .join("\n");
 
     setInputText(fixedString);
@@ -163,17 +222,60 @@ const MessageFixer = () => {
   };
 
   return (
-    <div className="p-4 bg-[#fafafa] h-[100vh] w-[100vw]">
-      <h1 className="text-[50px] font-semibold text-center mb-[50px]">
+    <div className="p-4 bg-[#fafafa] min-h-[100vh] w-full overflow-x-hidden">
+      <h1 className="text-[28px] sm:text-[36px] md:text-[50px] font-semibold text-center mb-[24px] md:mb-[50px] px-2">
         BUG FIXING TOOLS{" "}
-        <span className="text-emerald-500 font-bold">(V2.1)</span>
+        <span className="text-emerald-500 font-bold">(V2.2)</span>
       </h1>
-      <div className="flex gap-[50px] w-full justify-center items-start">
-        
-        {/* ✅ Left Column: Templates with Top Spacer */}
-        <div className="flex flex-col">
+
+      {/* ✅ Mobile-only hamburger button to open Templates dropdown */}
+      <div className="md:hidden mb-4 px-1">
+        <button
+          onClick={() => setIsMobileTemplateOpen((prev) => !prev)}
+          className="w-full flex items-center justify-between bg-white border-2 border-emerald-500 rounded-xl px-4 py-3 text-emerald-600 font-medium"
+        >
+          <span>
+            {selectedTemplate ? `Template: ${selectedTemplate.name}` : "Select Template"}
+          </span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`w-5 h-5 transition-transform ${
+              isMobileTemplateOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+
+        {/* Dropdown panel */}
+        {isMobileTemplateOpen && (
+          <div className="mt-2 bg-white border-2 border-emerald-200 rounded-xl p-3 max-h-[60vh] overflow-y-auto shadow-lg">
+            <Templates
+              selectedTemplate={selectedTemplate}
+              setSelectedTemplate={(tpl) => {
+                setSelectedTemplate(tpl);
+                setIsMobileTemplateOpen(false); // close after picking
+              }}
+              setInputText={setInputText}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-6 md:gap-[50px] w-full justify-center items-start px-1 md:px-0">
+
+        {/* ✅ Left Column: Templates — hidden on mobile (handled by dropdown above), visible from md up */}
+        <div className="hidden md:flex md:flex-col">
           {/* This empty div (h-6 + mb-2) aligns the template list with the textarea */}
-          <div className="h-6 mb-2"></div> 
+          <div className="h-6 mb-2"></div>
           <Templates
             selectedTemplate={selectedTemplate}
             setSelectedTemplate={setSelectedTemplate}
@@ -182,18 +284,18 @@ const MessageFixer = () => {
         </div>
 
         {/* ✅ Right Column: Message Fixer */}
-        <div className="flex flex-col w-[60%]">
+        <div className="flex flex-col w-full md:w-[60%]">
           {/* Character Count Header (Height = h-6 + mb-2) */}
-          <div className="flex justify-between items-end mb-2 px-1">
+          <div className="flex flex-wrap justify-between items-end gap-1 mb-2 px-1">
             <div className="h-6">
               {isOverLimit && (
-                <span className="text-red-500 font-medium text-sm flex items-center gap-1 animate-pulse">
+                <span className="text-red-500 font-medium text-xs sm:text-sm flex items-center gap-1 animate-pulse">
                   ⚠️ The max number reached. You need to optimize this.
                 </span>
               )}
             </div>
             <div
-              className={`text-sm font-bold px-2 py-1 rounded ${
+              className={`text-xs sm:text-sm font-bold px-2 py-1 rounded ${
                 isOverLimit ? "bg-red-100 text-red-600" : "text-emerald-600"
               }`}
             >
@@ -206,7 +308,7 @@ const MessageFixer = () => {
               id="id-01"
               placeholder="Write your message"
               rows="10"
-              className={`bg-white border-2 rounded-xl p-6 text-[18px] w-full h-[60vh] overflow-y-auto resize-none outline-none text-black transition-all ${
+              className={`bg-white border-2 rounded-xl p-4 md:p-6 text-base md:text-[18px] w-full h-[45vh] md:h-[60vh] overflow-y-auto resize-none outline-none text-black transition-all ${
                 isOverLimit
                   ? "border-red-500 focus:border-red-600 shadow-sm"
                   : "border-emerald-500 focus:border-emerald-600"
@@ -233,10 +335,10 @@ const MessageFixer = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed top-0 left-0 z-20 flex items-center justify-center w-screen h-screen bg-slate-300/20 backdrop-blur-sm transition-opacity">
-          <div className="flex flex-col h-[80vh] w-[60%] gap-6 overflow-hidden rounded bg-white p-6 text-slate-500 shadow-xl">
+        <div className="fixed top-0 left-0 z-20 flex items-center justify-center w-screen h-screen bg-slate-300/20 backdrop-blur-sm transition-opacity p-3 md:p-0">
+          <div className="flex flex-col h-[85vh] md:h-[80vh] w-full md:w-[60%] gap-4 md:gap-6 overflow-hidden rounded bg-white p-4 md:p-6 text-slate-500 shadow-xl">
             <header className="flex items-center justify-between">
-              <h3 className="text-[34px] font-medium text-slate-700">
+              <h3 className="text-[22px] md:text-[34px] font-medium text-slate-700">
                 FIXED YOUR BUG
               </h3>
               <button
@@ -261,14 +363,14 @@ const MessageFixer = () => {
             </header>
 
             <div
-              className={`text-sm mb-4 ${
+              className={`text-sm mb-2 md:mb-4 ${
                 badWordCount === 0 ? "text-green-500" : "text-red-500"
               }`}
             >
               <strong>{badWordCount}</strong> bad word(s) detected
             </div>
 
-            <div className="overflow-y-auto overflow-x-hidden h-full border rounded p-4 text-[18px] text-black leading-relaxed whitespace-pre-wrap break-words">
+            <div className="overflow-y-auto overflow-x-hidden h-full border rounded p-3 md:p-4 text-base md:text-[18px] text-black leading-relaxed whitespace-pre-wrap break-words">
               {modalContent.map((line, lineIndex) => (
                 <div key={lineIndex}>
                   {line.map((item) => {
@@ -288,7 +390,7 @@ const MessageFixer = () => {
               ))}
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-wrap justify-end gap-3">
               <button
                 onClick={resolveBugs}
                 className="cursor-pointer bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
@@ -331,7 +433,7 @@ const MessageFixer = () => {
         </div>
       )}
 
-      <footer className="fixed bottom-[5%] text-center w-full">
+      <footer className="static md:fixed md:bottom-[5%] text-center w-full mt-8 md:mt-0 pb-4">
         Developed by{" "}
         <span className="font-semibold text-emerald-600">Md. Hasan Kha</span>
       </footer>

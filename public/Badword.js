@@ -1,6 +1,8 @@
 export const badWordsMap = {
   email: "e-m-a-i-l",
   gmail: "g-m-a-i-l",
+  "@email": "e-m-a-i-l",
+  "@gmail": "g-m-a-i-l",
   payment: "p-a-y-m-e-n-t",
   contact : "c-o-n-t-a-c-t",
   skype : "s-k-y-p-e",
@@ -19,4 +21,6 @@ export const badWordsMap = {
   reviews : "r-e-v-i-e-w-s",
   review : "r-e-v-i-e-w",
   rating : "r-a-t-i-n-g",
+  "@": "",
+  "phone number" : "p-h-o-n-e n-u-m-b-e-r"
 };
